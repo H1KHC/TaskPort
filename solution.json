@@ -1,0 +1,99 @@
+[
+	{
+		"type":"config",
+		"distDir":"bin/",
+		"includeDir":[
+			"include/",
+			"src/"
+		]
+	}, {
+		"type":"config",
+		"name":"build",
+		"srcDirR":"src/"
+	}, {
+		"type":"config",
+		"name":"example",
+		"srcDir":"example/"
+	}, {
+		"type":"compiler",
+		"executableName":"g++",
+		"outputFlag":"-c -o",
+		"compileFlag":[
+			"-DTP_STATIC",
+			"-std=gnu++11"
+		]
+	}, {
+		"type":"compiler",
+		"name":"debug",
+		"compileFlag":[
+			"-g",
+			"-D_DEBUG",
+			"-DTP_IMPLEMENT"
+		]
+	}, {
+		"type":"compiler",
+		"name":"release",
+		"compileFlag":[
+			"-O2",
+			"-DTP_IMPLEMENT"
+		]
+	}, {
+		"type":"linker"
+	}, {
+		"type":"linker",
+		"name":"static",
+		"executableName":"ar",
+		"outputFlag":"r"
+	}, {
+		"type":"target",
+		"name":"libopentp.a",
+		"config":"build",
+		"compiler":"release",
+		"linker":"static"
+	}, {
+		"type":"target",
+		"name":"libopentpd.a",
+		"default":true,
+		"config":"build",
+		"compiler":"debug",
+		"linker":"static"
+	}, {
+		"type":"task",
+		"name":"debug",
+		"target":"libopentpd.a"
+	}, {
+		"type":"task",
+		"name":"release",
+		"target":"libopentp.a"
+	},
+	
+	{
+		"type":"compiler",
+		"name":"example",
+		"compileFlag":[
+			"-g"
+		]
+	}, {
+		"type":"linker",
+		"name":"example",
+		"executableName":"g++",
+		"outputFlag":"-o",
+		"linkFlag":[
+			"-g",
+			"-Lbin",
+			"-lopentpd",
+			"-pthread"
+		]
+	}, {
+		"type":"target",
+		"name":"helloworld",
+		"base":"libopentpd.a",
+		"config":"example",
+		"compiler":"example",
+		"linker":"example"
+	}, {
+		"type":"task",
+		"name":"example",
+		"target":["helloworld"]
+	}
+]
