@@ -2,6 +2,7 @@
 .build/
 .vscode/
 bin/
+test/
 
 # Prerequisites
 *.d

@@ -29,7 +29,7 @@ bin/libopentpd.a: .build/src/getCPUCoreCount.cpp.libopentpd.a.o .build/src/openT
 .build/example/helloworld.cpp.helloworld.o: example/helloworld.cpp include/openTP.h src/debug.h
 	@echo "Generating sources for target helloworld..."
 	@echo "[   0% ] Compiling .build/example/helloworld.cpp.helloworld.o..."
-	@g++ -c -o $@ $< -g -DTP_STATIC -std=gnu++11 -Iinclude/ -Isrc/
+	@g++ -c -o $@ $< -g -D_DEBUG -DTP_STATIC -std=gnu++11 -Iinclude/ -Isrc/
 
 .build/src/getCPUCoreCount.cpp.libopentp.a.o: src/getCPUCoreCount.cpp
 	@echo "Generating sources for target libopentp.a..."

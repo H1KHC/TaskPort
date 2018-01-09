@@ -4,7 +4,8 @@
 void tpSetCountOfWorkers(int count) {
 	if(DEFAULT_COUNT_OF_WORKERS == count) {
 		int getCPUCoreCount();
-		count = getCPUCoreCount();
+		count = std::thread::hardware_concurrency();
+		if(!count) count = getCPUCoreCount();
 	}
 	if(count > 0) workers.terminated = false;
 	else workers.terminateAll();
@@ -32,10 +33,10 @@ void tpWaitForTasks() {
 	tasks.waitForTasks();
 }
 
-int tpGetTaskState(int tid) {
+int tpGetTaskState(long tid) {
 	return tasks.getState(tid);
 }
 
-int tpGetTaskResult(int tid, void **result) {
+int tpGetTaskResult(long tid, void **result) {
 	return tasks.getResult(tid, result);
 }

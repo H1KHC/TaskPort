@@ -1,6 +1,6 @@
 #include "openTP.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include "debug.h"
 
 void* helloworld(void *x) {
@@ -8,30 +8,40 @@ void* helloworld(void *x) {
 	return x;
 }
 
-int taskID[101];
-
 int main() {
-	for(int i = 1; i <= 100; ++i)
+	unsigned long taskID[11];
+	for(long i = 1; i <= 10; ++i)
 		taskID[i] = tpAddTask(helloworld, (void*)i, -i);
+	printf("Task added\n");
 	tpSetCountOfWorkers();
+	printf("Start waiting\n");
 	tpWaitForTasks();
+	printf("Tasks are finished, terminating...\n");
 	tpSetCountOfWorkers(0);
+	printf("Waiting for termination...\n");
 	tpWaitForTermination();
-	for(int i = 1; i <= 100; ++i) {
-		long ret;
-		tpGetTaskResult(i, (void**)(&ret));
-		printf("Task %d returns %d\n", taskID[i], ret);
+	printf("Finished task 1\n");
+	for(long i = 1; i <= 10; ++i) {
+		void *result;
+		if(!tpGetTaskResult(taskID[i], &result))
+			printf("Couldn't find task %lu's result\n", taskID[i]);
+		printf("Task %lu returns with %lu\n", taskID[i], (unsigned long)result);
 	}
 
 	tpSetCountOfWorkers();
-	for(int i = 100; i >= 1; --i)
+	for(int i = 1; i <= 10; ++i)
 		taskID[i] = tpAddTask(helloworld, (void*)i, i);
+	printf("Task added, Start Waiting\n");
 	tpWaitForTasks();
+	printf("Tasks are finished, terminating...\n");
 	tpTerminate();
+	printf("Waiting for termination...\n");
 	tpWaitForTermination();
-	for(int i = 100; i >= 1; --i) {
-		long ret;
-		tpGetTaskResult(i, (void**)(&ret));
-		printf("Task %d returns %d\n", taskID[i], ret);
+	printf("Finished task 2\n");
+	for(long i = 1; i <= 10; ++i) {
+		void *result;
+		if(!tpGetTaskResult(taskID[i], &result))
+			printf("Couldn't find task %lu's result\n", taskID[i]);
+		printf("Task %lu returns with %lu\n", taskID[i], (unsigned long)result);
 	}
 }

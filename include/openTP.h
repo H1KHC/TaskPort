@@ -42,9 +42,9 @@ TPAPI void tpWaitForTasks();
 #define TASK_STATE_ASSIGNED			1
 #define TASK_STATE_FINISHED			2
 #define TASK_STATE_DETACHED			3
-TPAPI int tpGetTaskState(int tid);
+TPAPI int tpGetTaskState(long tid);
 
-TPAPI int tpGetTaskResult(int tid, void**result);
+TPAPI int tpGetTaskResult(long tid, void**result);
 
 #ifdef __cplusplus
 }

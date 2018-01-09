@@ -1,109 +1,101 @@
+#include <chrono>
 #include "debug.h"
 #include "worker/worker.h"
 #include "taskManager.h"
 
-TaskManager::TaskManager() :IDTail(1), countPendingTasks(0) {}
+TaskManager::TaskManager() : IDTail(1), countExistingTasks(0) {}
 
 long TaskManager::add(taskFunction f, void *p, int priority) {
-	Task *t = new Task(IDTail++, priority, f, p);
+	taskManagerMutex.lock();
+	unsigned long id = IDTail++;
+	Task *t = new Task(id, priority, f, p);
 
-	pendingTasksMutex.lock();
 	pendingTasks.insert(t);
-	pendingTasksMutex.unlock();
-	
-	existingTasksMutex.lock();
 	existingTasks.insert(t);
-	++countPendingTasks;
-	existingTasksMutex.unlock();
+	++countExistingTasks;
 
 	waitTask.notify_one();
-
-	return t->ID;
+	taskManagerMutex.unlock();
+	return id;
 }
 
 void TaskManager::getTaskFor(Worker *worker) {
 	std::unique_lock<std::mutex> lck(waitTaskMutex);
 	while(true) {
-		pendingTasksMutex.lock();
+		taskManagerMutex.lock();
 		if(!pendingTasks.empty() || worker->terminateFlag) break;
-		pendingTasksMutex.unlock();
-		waitTask.wait(lck);
+		taskManagerMutex.unlock();
+		waitTask.wait_for(lck, std::chrono::microseconds(1));
 	}
 	if(worker->terminateFlag) {
 		if(!pendingTasks.empty())
 			waitTask.notify_one();
-		pendingTasksMutex.unlock();
+		taskManagerMutex.unlock();
 		return;
 	}
 	auto it = pendingTasks.begin();
 	Task *task = *it;
 	(*it)->state = TASK_STATE_ASSIGNED;
 	pendingTasks.erase(it);
-	pendingTasksMutex.unlock();
+	taskManagerMutex.unlock();
 	task->owner = worker;
 	worker->task = task;
 }
 
 void TaskManager::submit(Worker *worker, Task *task, void *result) {
 	worker->task = nullptr;
-	existingTasksMutex.lock();
+	taskManagerMutex.lock();
 	existingTasks.erase(task);
-	--countPendingTasks;
-	existingTasksMutex.unlock();
-	if(task->state == TASK_STATE_ASSIGNED) {
-		finishedTasksMutex.lock();
-		// log("Task %d completes with value %lu\n", task->ID, (unsigned long)result);
+	--countExistingTasks;
+	if(task->state == TASK_STATE_ASSIGNED)
 		finishedTasks.insert(std::make_pair(task->ID, result));
-		finishedTasksMutex.unlock();
-	}
+	taskManagerMutex.unlock();
 	delete task;
 	waitForAllTasks.notify_all();
 }
 
-bool TaskManager::getResult(int ID, void **result) {
-	finishedTasksMutex.lock();
+bool TaskManager::getResult(long ID, void **result) {
+	taskManagerMutex.lock();
 	auto it = finishedTasks.find(ID);
 	if(it == finishedTasks.end()) {
-		finishedTasksMutex.unlock();
+		taskManagerMutex.unlock();
 		return false;
 	}
 	*result = it->second;
 	finishedTasks.erase(it);
-	finishedTasksMutex.unlock();
+	taskManagerMutex.unlock();
 	return true;
 }
 
-int TaskManager::getState(int ID) {
-	finishedTasksMutex.lock();
+int TaskManager::getState(long ID) {
+	taskManagerMutex.lock();
 	if(finishedTasks.find(ID) != finishedTasks.end()) {
-		finishedTasksMutex.unlock();
+		taskManagerMutex.unlock();
 		return TASK_STATE_FINISHED;
 	}
-	finishedTasksMutex.unlock();
 
 	auto toFind = new Task(ID);
-	existingTasksMutex.lock();
 	auto it = existingTasks.find(toFind);
 	delete toFind;
 	if(it == existingTasks.end()) {
-		existingTasksMutex.unlock();
+		taskManagerMutex.unlock();
 		return TASK_NOT_FOUND;
 	}
 	int state = (*it)->state;
-	existingTasksMutex.unlock();
+	taskManagerMutex.unlock();
 	return state;
 }
 
 void TaskManager::waitForTasks() {
 	std::unique_lock<std::mutex> lck(waitForAllTasksMutex);
 	while(true) {
-		existingTasksMutex.lock();
-		if(countPendingTasks == 0) {
-			existingTasksMutex.unlock();
+		taskManagerMutex.lock();
+		if(countExistingTasks == 0) {
+			taskManagerMutex.unlock();
 			return;
 		}
-		existingTasksMutex.unlock();
-		waitForAllTasks.wait(lck);
+		taskManagerMutex.unlock();
+		waitForAllTasks.wait_for(lck, std::chrono::microseconds(1));
 	}
 }
 

@@ -43,7 +43,7 @@
 		"type":"linker",
 		"name":"static",
 		"executableName":"ar",
-		"outputFlag":"r"
+		"outputFlag":"rc"
 	}, {
 		"type":"target",
 		"name":"libopentp.a",
@@ -71,7 +71,8 @@
 		"type":"compiler",
 		"name":"example",
 		"compileFlag":[
-			"-g"
+			"-g",
+			"-D_DEBUG"
 		]
 	}, {
 		"type":"linker",

@@ -24,8 +24,8 @@ public:
 
 private:
 	friend class WorkerManager;
-	std::atomic_ulong IDTail, countPendingTasks;
-	std::mutex pendingTasksMutex, existingTasksMutex, finishedTasksMutex;
+	std::atomic_ulong IDTail, countExistingTasks;
+	std::mutex taskManagerMutex;
 	std::mutex waitTaskMutex, waitForAllTasksMutex;
 	std::condition_variable waitTask, waitForAllTasks;
 	std::set<Task *, taskSortPriorityFirst> pendingTasks;
@@ -58,10 +58,10 @@ protected:
 public:
 	// Find a finished task and get its result
 	// This will delete the task completely
-	bool getResult(int ID, void **result);
+	bool getResult(long ID, void **result);
 
 	// Get a task's state
-	int getState(int ID);
+	int getState(long ID);
 
 	void waitForTasks();
 

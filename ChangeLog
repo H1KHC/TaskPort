@@ -1,4 +1,20 @@
 2018-01-09 {
     + Basic frame is completed
     * Published onto GitHub
+    * Fixed dead lock partially
+
+    {
+        I need to say something about the condition_variable...
+
+        The dead lock was cause like this (ordered in time):
+        (Thread role)   (pseudocode)                (return)
+            Sub         check_if_need_terminate()   false
+            Main        terminate_all()             none
+            Main        notify_all_threads          none
+            Sub         wait_until_notified()       none
+
+        Does anybody has any idea?
+
+        I just changed the wait function from wait() to wait_for(1ms)...
+    }
 }

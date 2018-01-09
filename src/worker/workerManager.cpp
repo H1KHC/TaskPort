@@ -3,8 +3,7 @@
 #include "workerManager.h"
 #include "task/taskManager.h"
 
-WorkerManager::WorkerManager() :
-	terminated(true), maxWorker(0), detachedWorker(0), IDTail(1) {}
+WorkerManager::WorkerManager() : terminated(true), maxWorker(0), detachedWorker(0), IDTail(1) {}
 
 void WorkerManager::addWorker() {
 	Worker *worker = new Worker(IDTail++);
@@ -15,6 +14,7 @@ void WorkerManager::addWorker() {
 }
 
 bool WorkerManager::checkIfNeedTerminate(Worker *&worker) {
+	if(terminated) return true;
 	workersMutex.lock();
 	int size = workers.size();
 	workersMutex.unlock();
@@ -36,7 +36,8 @@ void WorkerManager::erase(Worker *worker) {
 void WorkerManager::terminateAll() {
 	terminated = true;
 	workersMutex.lock();
-	for(Worker *worker : workers) worker->terminateFlag = true;
+	for(Worker *worker : workers)
+		worker->terminateFlag = true;
 	workersMutex.unlock();
 	tasks.waitTask.notify_all();
 }
