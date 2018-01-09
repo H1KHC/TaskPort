@@ -52,7 +52,7 @@ void TaskManager::submit(Worker *worker, Task *task, void *result) {
 	existingTasksMutex.unlock();
 	if(task->state == TASK_STATE_ASSIGNED) {
 		finishedTasksMutex.lock();
-		log("Task %d completes with value %uld\n", task->ID, (unsigned long)result);
+		// log("Task %d completes with value %lu\n", task->ID, (unsigned long)result);
 		finishedTasks.insert(std::make_pair(task->ID, result));
 		finishedTasksMutex.unlock();
 	}
