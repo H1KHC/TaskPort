@@ -1,0 +1,2 @@
+# 0001: If in a short period two tasks are inserted, the second one will be
+ ignored due to their "same" time and priority

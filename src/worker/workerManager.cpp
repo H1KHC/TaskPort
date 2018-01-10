@@ -39,7 +39,7 @@ void WorkerManager::terminateAll() {
 	for(Worker *worker : workers)
 		worker->terminateFlag = true;
 	workersMutex.unlock();
-	tasks.waitTask.notify_all();
+	tasks.waitForNewTask.notify_all();
 }
 
 WorkerManager workers;

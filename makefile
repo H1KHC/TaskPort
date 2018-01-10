@@ -6,7 +6,7 @@ all: task_debug task_example task_release
 task_debug: directories bin/libopentpd.a
 	@echo "Task debug has been finished!"
 
-task_example: directories bin/helloworld
+task_example: directories bin/helloworld bin/wait
 	@echo "Task example has been finished!"
 
 task_release: directories bin/libopentp.a
@@ -18,12 +18,16 @@ bin/helloworld: bin/libopentpd.a .build/example/helloworld.cpp.helloworld.o
 	@echo "[ 100% ] Target helloworld has been built!"
 
 bin/libopentp.a: .build/src/getCPUCoreCount.cpp.libopentp.a.o .build/src/openTP.cpp.libopentp.a.o .build/src/task/taskManager.cpp.libopentp.a.o .build/src/worker/worker.cpp.libopentp.a.o .build/src/worker/workerManager.cpp.libopentp.a.o
-	@ar r $@ $^ 
+	@ar rc $@ $^ 
 	@echo "[ 100% ] Target libopentp.a has been built!"
 
 bin/libopentpd.a: .build/src/getCPUCoreCount.cpp.libopentpd.a.o .build/src/openTP.cpp.libopentpd.a.o .build/src/task/taskManager.cpp.libopentpd.a.o .build/src/worker/worker.cpp.libopentpd.a.o .build/src/worker/workerManager.cpp.libopentpd.a.o
-	@ar r $@ $^ 
+	@ar rc $@ $^ 
 	@echo "[ 100% ] Target libopentpd.a has been built!"
+
+bin/wait: bin/libopentpd.a .build/example/wait.cpp.wait.o
+	@g++ -o $@ $^ -g -Lbin -lopentpd -pthread
+	@echo "[ 100% ] Target wait has been built!"
 
 # Sources:
 .build/example/helloworld.cpp.helloworld.o: example/helloworld.cpp include/openTP.h src/debug.h
@@ -40,7 +44,7 @@ bin/libopentpd.a: .build/src/getCPUCoreCount.cpp.libopentpd.a.o .build/src/openT
 	@echo "[  20% ] Compiling .build/src/openTP.cpp.libopentp.a.o..."
 	@g++ -c -o $@ $< -O2 -DTP_IMPLEMENT -DTP_STATIC -std=gnu++11 -Iinclude/ -Isrc/
 
-.build/src/task/taskManager.cpp.libopentp.a.o: src/task/taskManager.cpp src/debug.h src/worker/worker.h src/task/taskManager.h src/task/task.h include/openTP.h
+.build/src/task/taskManager.cpp.libopentp.a.o: src/task/taskManager.cpp include/openTP.h src/debug.h src/worker/worker.h src/task/taskManager.h src/task/task.h
 	@echo "[  40% ] Compiling .build/src/task/taskManager.cpp.libopentp.a.o..."
 	@g++ -c -o $@ $< -O2 -DTP_IMPLEMENT -DTP_STATIC -std=gnu++11 -Iinclude/ -Isrc/
 
@@ -61,7 +65,7 @@ bin/libopentpd.a: .build/src/getCPUCoreCount.cpp.libopentpd.a.o .build/src/openT
 	@echo "[  20% ] Compiling .build/src/openTP.cpp.libopentpd.a.o..."
 	@g++ -c -o $@ $< -g -D_DEBUG -DTP_IMPLEMENT -DTP_STATIC -std=gnu++11 -Iinclude/ -Isrc/
 
-.build/src/task/taskManager.cpp.libopentpd.a.o: src/task/taskManager.cpp src/debug.h src/worker/worker.h src/task/taskManager.h src/task/task.h include/openTP.h
+.build/src/task/taskManager.cpp.libopentpd.a.o: src/task/taskManager.cpp include/openTP.h src/debug.h src/worker/worker.h src/task/taskManager.h src/task/task.h
 	@echo "[  40% ] Compiling .build/src/task/taskManager.cpp.libopentpd.a.o..."
 	@g++ -c -o $@ $< -g -D_DEBUG -DTP_IMPLEMENT -DTP_STATIC -std=gnu++11 -Iinclude/ -Isrc/
 
@@ -73,6 +77,11 @@ bin/libopentpd.a: .build/src/getCPUCoreCount.cpp.libopentpd.a.o .build/src/openT
 	@echo "[  80% ] Compiling .build/src/worker/workerManager.cpp.libopentpd.a.o..."
 	@g++ -c -o $@ $< -g -D_DEBUG -DTP_IMPLEMENT -DTP_STATIC -std=gnu++11 -Iinclude/ -Isrc/
 
+.build/example/wait.cpp.wait.o: example/wait.cpp include/openTP.h src/debug.h
+	@echo "Generating sources for target wait..."
+	@echo "[   0% ] Compiling .build/example/wait.cpp.wait.o..."
+	@g++ -c -o $@ $< -g -D_DEBUG -DTP_STATIC -std=gnu++11 -Iinclude/ -Isrc/
+
 # Others:
 directories:
 	@mkdir -p .build/ .build/example .build/src .build/src/task .build/src/worker bin/
@@ -83,5 +92,5 @@ distclean:
 	@echo "Cleaned!"
 
 clean:
-	@rm -rf .build/ .build/example .build/src .build/src/task .build/src/worker bin/ bin/helloworld bin/libopentp.a bin/libopentpd.a
+	@rm -rf .build/ .build/example .build/src .build/src/task .build/src/worker bin/ bin/helloworld bin/libopentp.a bin/libopentpd.a bin/wait
 	@echo "Cleaned!"

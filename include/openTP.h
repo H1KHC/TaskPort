@@ -32,16 +32,19 @@ TPAPI void tpWaitForTermination();
 
 #define INVALID_TASK_ID						(-1)
 TPAPI long tpAddTask(taskFunction func, void *param, int priority DEFAULT(0));
-//TPAPI int cancelTask(int tid, int force);
-//TPAPI int waitForTask(int tid);
-//TPAPI int waitForTaskFor(int tid, long milli);
-TPAPI void tpWaitForTasks();
+//TPAPI int tpCancelTask(int tid, int force);
 
-#define TASK_NOT_FOUND				(-1)
-#define TASK_STATE_QUEUING			0
-#define TASK_STATE_ASSIGNED			1
-#define TASK_STATE_FINISHED			2
-#define TASK_STATE_DETACHED			3
+#define TASK_WAIT_SUCCESSFUL                0
+#define TASK_WAIT_TIME_OUT					1
+TPAPI int tpWaitForTask(int tid);
+TPAPI int tpWaitForTaskFor(int tid, long microseconds);
+TPAPI void tpWaitForAllTasks();
+
+#define TASK_NOT_FOUND		        		(-1)
+#define TASK_STATE_QUEUING	        		0
+#define TASK_STATE_ASSIGNED		        	1
+#define TASK_STATE_FINISHED		        	2
+#define TASK_STATE_DETACHED		        	3
 TPAPI int tpGetTaskState(long tid);
 
 TPAPI int tpGetTaskResult(long tid, void**result);

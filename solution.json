@@ -85,16 +85,31 @@
 			"-lopentpd",
 			"-pthread"
 		]
-	}, {
+	},
+	
+	{
 		"type":"target",
 		"name":"helloworld",
 		"base":"libopentpd.a",
+		"src":"helloworld.cpp",
 		"config":"example",
 		"compiler":"example",
 		"linker":"example"
-	}, {
+	},
+	
+	{
+		"type":"target",
+		"name":"wait",
+		"base":"libopentpd.a",
+		"src":"wait.cpp",
+		"config":"example",
+		"compiler":"example",
+		"linker":"example"
+	},
+	
+	{
 		"type":"task",
 		"name":"example",
-		"target":["helloworld"]
+		"target":["helloworld", "wait"]
 	}
 ]

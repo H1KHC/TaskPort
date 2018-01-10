@@ -29,7 +29,15 @@ long tpAddTask(taskFunction func, void *param, int priority) {
 	return tasks.add(func, param, priority);
 }
 
-void tpWaitForTasks() {
+int tpWaitForTask(int tid) {
+	return tasks.wait(tid);
+}
+
+int tpWaitForTaskFor(int tid, long microseconds) {
+	return tasks.waitFor(tid, microseconds);
+}
+
+void tpWaitForAllTasks() {
 	tasks.waitForTasks();
 }
 

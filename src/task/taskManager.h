@@ -3,7 +3,6 @@
 
 #include <set>
 #include <mutex>
-#include <atomic>
 #include <unordered_map>
 #include <condition_variable>
 #include "debug.h"
@@ -24,20 +23,23 @@ public:
 
 private:
 	friend class WorkerManager;
-	std::atomic_ulong IDTail, countExistingTasks;
+	int IDTail;
 	std::mutex taskManagerMutex;
-	std::mutex waitTaskMutex, waitForAllTasksMutex;
-	std::condition_variable waitTask, waitForAllTasks;
-	std::set<Task *, taskSortPriorityFirst> pendingTasks;
-	std::set<Task *, taskSortIDFirst> existingTasks;
+	std::mutex waitForNewTaskMutex, waitForExistingTaskMutex;
+	std::condition_variable waitForNewTask, waitForExistingTask;
+	std::multiset<Task *, taskSortPriorityFirst> pendingTasks;
+	std::multiset<Task *, taskSortIDFirst> existingTasks;
 	std::unordered_map<int, void*> finishedTasks;
-
-protected:
 	friend void workingProcess(Worker *worker);
+
+public:
 	// pull a task request
 	long add(taskFunction f, void *p, int priority);
-	friend long tpAddTask(taskFunction func, void *param, int priority);
 
+	int wait(int ID);
+	int waitFor(int ID, long microseconds);
+
+protected:
 	// If the task to cancel is queuing, it will be erased
 	// Else if it is running, it will be either detached or terminated
 	//   depends on whether flag force is set or not

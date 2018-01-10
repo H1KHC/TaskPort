@@ -1,3 +1,8 @@
+2018-01-10 {
+    + added single task wait function
+    * fixed bug #0001
+}
+
 2018-01-09 {
     + Basic frame is completed
     * Published onto GitHub

@@ -2,7 +2,6 @@
 #define __WORKER_MANAGER_H__
 
 #include <mutex>
-#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include "worker.h"
@@ -13,7 +12,7 @@ class WorkerManager {
 	friend void tpSetCountOfWorkers(int count);
 	std::mutex workersMutex, waitWorkerMutex;
 	std::condition_variable waitWorker;
-	std::atomic_ulong maxWorker, detachedWorker, IDTail;
+	int maxWorker, detachedWorker, IDTail;
 	std::list<Worker *> workers;
 protected:
 	friend void workingProcess(Worker *worker);
